@@ -9,14 +9,6 @@ def generate_arc(x1, y1, x2, y2):
     # Define the EPSG code
     epsg_code = 3857
 
-    # Create a new memory layer with EPSG 3857
-    layer_name = "Arc"
-    point_layer = QgsVectorLayer(f"Point?crs=EPSG:{epsg_code}", layer_name, "memory")
-    provider = point_layer.dataProvider()
-
-    # Add fields for attributes if needed
-    provider.addAttributes([QgsField("Name", QVariant.String)])
-    point_layer.updateFields()
 
     # Define the two points
     point1 = QgsPoint(x1, y1)
