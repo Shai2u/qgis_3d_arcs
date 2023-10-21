@@ -3,6 +3,47 @@ from qgis.core import QgsProject, QgsGeometry, QgsVectorLayer, QgsField, QgsFeat
 from qgis.PyQt.QtCore import QVariant
 import numpy as np
 
+def rotation_x(rad_angle):
+    return  np.array([
+        [1, 0, 0, 0],
+        [0, np.cos(rad_angle), -np.sin(rad_angle), 0],
+        [0, np.sin(rad_angle), np.cos(rad_angle), 0],
+        [0, 0, 0, 1]
+    ])
+
+
+def rotation_y(rad_angle):
+    return np.array([
+        [np.cos(rad_angle), 0, np.sin(rad_angle), 0],
+        [0, 1, 0, 0],
+        [-np.sin(rad_angle), 0, np.cos(rad_angle), 0],
+        [0, 0, 0, 1]
+    ])
+
+def rotation_z(rad_angle):
+    return np.array([
+        [np.cos(rad_angle), -np.sin(rad_angle), 0, 0],
+        [np.sin(rad_angle), np.cos(rad_angle), 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+    ])
+
+def scale_z(scale_):
+    return np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, scale_, 0],
+        [0, 0, 0, 1]
+    ])
+
+def translate(x, y):
+    return np.array([
+        [1, 0, 0, x],
+        [0, 1, 0, y],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+    ])
+
 def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale):
     # Define the EPSG code
     epsg_code = 3857
@@ -40,57 +81,12 @@ def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale):
             points_array = np.append(points_array, np.array([[point_.x(), point_.y(), 0.0]]), axis=0)
 
 
-    # Define rotation angles in radians
-    angle_x = np.radians(0)  # Rotation around Y-axis
-
-    angle_y = np.radians(y_angle)  # Rotation around Y-axis
-
     # Calculate the bearing between the two points
     bearing = point2.azimuth(point1)
 
-    angle_z = np.radians(bearing)  # Rotation around Z-axis
-
-    # Apply the rotation around Y-axis (using the standard 3D rotation matrix)
-    rotation_x = np.array([
-        [1, 0, 0, 0],
-        [0, np.cos(angle_x), -np.sin(angle_x), 0],
-        [0, np.sin(angle_x), np.cos(angle_x), 0],
-        [0, 0, 0, 1]
-    ])
-
-    rotation_y = np.array([
-        [np.cos(angle_y), 0, np.sin(angle_y), 0],
-        [0, 1, 0, 0],
-        [-np.sin(angle_y), 0, np.cos(angle_y), 0],
-        [0, 0, 0, 1]
-    ])
-
-    # Apply the rotation around Z-axis (using the standard 3D rotation matrix)
-    rotation_z = np.array([
-        [np.cos(angle_z), -np.sin(angle_z), 0, 0],
-        [np.sin(angle_z), np.cos(angle_z), 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
-    ])
-
-    # Apply scaling along the Z-axis
-    scaling_z = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, z_scale, 0],
-        [0, 0, 0, 1]
-    ])
-    inverse_center_translation = np.array([
-        [1, 0, 0, center_point.asPoint().x()],
-        [0, 1, 0, center_point.asPoint().y()],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
-    ])
-
     points_array = np.hstack([points_array, np.ones((points_array.shape[0], 1))])
     # Apply the transformation to the points
-    transformed_points = np.dot(points_array, rotation_y)
-
+    transformed_points = np.dot(points_array, rotation_y(np.radians(90)))
 
     # get only positive points
     transformed_points = transformed_points[transformed_points[:,2]>=-0.1]
@@ -98,12 +94,14 @@ def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale):
     # Sort by Y and remove duplicates
     unique_data = np.unique(transformed_points, axis=0)
     sorted = unique_data[unique_data[:,1].argsort()]
+    transformed_points = np.dot(sorted, rotation_y(np.radians(y_angle - 90)))
 
     # Continue transformation
-    transformed_points = np.dot(sorted, rotation_z)
-    transformed_points = np.dot(transformed_points, scaling_z)
-    transformed_points = transformed_points.dot(inverse_center_translation.T)
-
+    transformed_points = np.dot(transformed_points, rotation_z(np.radians(bearing)))
+    
+    # Scale arc in z axis
+    transformed_points = np.dot(transformed_points, scale_z(z_scale))
+    transformed_points = transformed_points.dot(translate(center_point.asPoint().x(), center_point.asPoint().y()).T)
 
     stacked_array = transformed_points
     # TODO add 0 and last point
@@ -112,7 +110,6 @@ def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale):
     polyline_points = []
     for i in range(stacked_array.shape[0]):
         x = stacked_array[i][0]
-        print(x)
         y = stacked_array[i][1]
         z = stacked_array[i][2]
         polyline_points.append(QgsPoint(x, y, z))
@@ -145,4 +142,4 @@ def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale):
     iface.mapCanvas().refresh()
 
 
-generate_arc(3834358, 3699610, 3877714, 3757735, 10, 90, 0.5)
+generate_arc(3834358, 3699610, 3877714, 3757735, 10, 45, 0.5)
