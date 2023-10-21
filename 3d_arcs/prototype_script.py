@@ -72,7 +72,10 @@ angle_x = np.radians(0)  # Rotation around Y-axis
 angle_y = np.radians(90)  # Rotation around Y-axis
 
 # get bearing
-angle_z = np.radians(45)  # Rotation around Z-axis
+# Calculate the bearing between the two points
+bearing = point2.azimuth(point1)
+
+angle_z = np.radians(bearing)  # Rotation around Z-axis
 
 # Apply the rotation around Y-axis (using the standard 3D rotation matrix)
 rotation_x = np.array([
