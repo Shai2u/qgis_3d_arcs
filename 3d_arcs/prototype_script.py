@@ -3,12 +3,9 @@ from qgis.core import QgsProject, QgsGeometry, QgsVectorLayer, QgsField, QgsFeat
 from qgis.PyQt.QtCore import QVariant
 import numpy as np
 
-
-
-def generate_arc(x1, y1, x2, y2):
+def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale):
     # Define the EPSG code
     epsg_code = 3857
-
 
     # Define the two points
     point1 = QgsPoint(x1, y1)
@@ -22,35 +19,19 @@ def generate_arc(x1, y1, x2, y2):
     line_layer.updateFields()
     line_geometry = QgsGeometry.fromPolyline([point1, point2])
 
-
-    # Create a feature for the line
-    feature = QgsFeature()
-    feature.setGeometry(line_geometry)
-    feature.setAttributes(["Line"])
-    line_layer.dataProvider().addFeatures([feature])
-
-    # Add the layer to the project
-    QgsProject.instance().addMapLayer(line_layer)
-
     # Get the center coordinate
     center_point = QgsGeometry.fromPointXY(line_geometry.centroid().asPoint())
 
     # Get the origin coordinate
     origin = QgsGeometry.fromPointXY(QgsPointXY(0, 0))
 
-    # Specify the radius for the circle (adjust as needed)
-
-
-    # Calculate the distance between the two points
-    # distance_area = QgsDistanceArea()
-    # distance = distance_area.measureLine(point1, point2)
+    # Specify the radius for the circle
     radius = int(line_geometry.length()/2)
 
     # Create the circle polygon
-    circle = origin.buffer(radius,10)
+    circle = origin.buffer(radius, segments)
 
-
-
+    # Populate array with X,Y,Z coordinates
     for i in range(len(circle.asPolygon()[0])):
         point_ = circle.asPolygon()[0][i]
         if i == 0:
@@ -62,9 +43,8 @@ def generate_arc(x1, y1, x2, y2):
     # Define rotation angles in radians
     angle_x = np.radians(0)  # Rotation around Y-axis
 
-    angle_y = np.radians(90)  # Rotation around Y-axis
+    angle_y = np.radians(y_angle)  # Rotation around Y-axis
 
-    # get bearing
     # Calculate the bearing between the two points
     bearing = point2.azimuth(point1)
 
@@ -97,7 +77,7 @@ def generate_arc(x1, y1, x2, y2):
     scaling_z = np.array([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
-        [0, 0, 0.75, 0],
+        [0, 0, z_scale, 0],
         [0, 0, 0, 1]
     ])
     inverse_center_translation = np.array([
@@ -106,63 +86,27 @@ def generate_arc(x1, y1, x2, y2):
         [0, 0, 1, 0],
         [0, 0, 0, 1]
     ])
-    # Combine the rotations and scaling
-    # matrix = rotation_y.dot(rotation_z).dot(inverse_center_translation)
-    matrix = rotation_y.dot(inverse_center_translation)
 
     points_array = np.hstack([points_array, np.ones((points_array.shape[0], 1))])
     # Apply the transformation to the points
-    # transformed_points = points_array.dot(matrix.T)
-    # transformed_points = np.dot(points_array, np.dot(rotation_y,rotation_z).T)
-    # transformed_points = np.dot(points_array, np.dot(np.dot(rotation_x,rotation_y), rotation_z).T)
     transformed_points = np.dot(points_array, rotation_y)
-    transformed_points = np.dot(transformed_points, scaling_z)
-    # transformed_points = np.dot(points_array, rotation_y.T)
-    transformed_points = np.dot(transformed_points, rotation_z)
+
 
     # get only positive points
     transformed_points = transformed_points[transformed_points[:,2]>=-0.1]
-    transformed_points = transformed_points.dot(inverse_center_translation.T)
 
-    # Drop the last column
-    # transformed_points_part_2 = transformed_points[:int(transformed_points.shape[0]/2), :-1]
-    # transformed_points_part_1 = transformed_points[int(transformed_points.shape[0]/2)+1 :, :-1]
-
-    # stacked_array = np.vstack((transformed_points_part_1, transformed_points_part_2))
+    # Sort by Y and remove duplicates
     unique_data = np.unique(transformed_points, axis=0)
     sorted = unique_data[unique_data[:,1].argsort()]
 
-    stacked_array = sorted
+    # Continue transformation
+    transformed_points = np.dot(sorted, rotation_z)
+    transformed_points = np.dot(transformed_points, scaling_z)
+    transformed_points = transformed_points.dot(inverse_center_translation.T)
+
+
+    stacked_array = transformed_points
     # TODO add 0 and last point
-
-    # Create a new feature and set its geometry
-    feature = QgsFeature()
-    feature.setGeometry(circle)
-
-    polygon_layer = QgsVectorLayer(f"Polygon?crs=EPSG:{epsg_code}", "Buffer Layer", "memory")
-    provider = polygon_layer.dataProvider()
-
-    # Add attributes to the buffer layer (if needed)
-    provider.addAttributes([QgsField("Name", QVariant.String)])
-    polygon_layer.updateFields()
-
-    # Add the feature to the layer
-    polygon_layer.startEditing()
-
-    buffer_feature = QgsFeature()
-    buffer_feature.setGeometry(circle)
-    buffer_feature.setAttributes(["buffer"])
-
-
-    polygon_layer.addFeature(buffer_feature)
-
-
-    # Commit changes and stop editing
-    polygon_layer.commitChanges()
-
-    # Add the layer to the project
-    QgsProject.instance().addMapLayer(polygon_layer)
-
 
     # Create a list of 3D points (replace with your own coordinates)
     polyline_points = []
@@ -182,6 +126,7 @@ def generate_arc(x1, y1, x2, y2):
     provider.addAttributes([QgsField("Name", QVariant.String)])
     polyline_layer.updateFields()
     polyline_layer.startEditing()
+    
     # Create a feature with the 3D polyline
     feature = QgsFeature()
     feature.setGeometry(polyline)
@@ -208,4 +153,4 @@ def generate_arc(x1, y1, x2, y2):
     iface.mapCanvas().refresh()
 
 
-generate_arc(3834358, 3699610, 3877714, 3757735)
+generate_arc(3834358, 3699610, 3877714, 3757735, 10, 90, 0.5)
