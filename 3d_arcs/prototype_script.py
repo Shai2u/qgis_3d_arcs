@@ -5,7 +5,7 @@ import numpy as np
 
 
 
-def generate_arc():
+def generate_arc(x1, y1, x2, y2):
     # Define the EPSG code
     epsg_code = 3857
 
@@ -215,3 +215,5 @@ def generate_arc():
     # Refresh the map canvas
     iface.mapCanvas().refresh()
 
+
+generate_arc(3834358, 3699610, 3877714, 3757735)
