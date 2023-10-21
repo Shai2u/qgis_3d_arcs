@@ -67,7 +67,7 @@ for i in range(len(circle.asPolygon()[0])):
 
 
 # Define rotation angles in radians
-angle_x = np.radians(90)  # Rotation around Y-axis
+angle_x = np.radians(0)  # Rotation around Y-axis
 
 angle_y = np.radians(90)  # Rotation around Y-axis
 
@@ -128,16 +128,24 @@ points_array = np.hstack([points_array, np.ones((points_array.shape[0], 1))])
 # transformed_points = points_array.dot(matrix.T)
 # transformed_points = np.dot(points_array, np.dot(rotation_y,rotation_z).T)
 # transformed_points = np.dot(points_array, np.dot(np.dot(rotation_x,rotation_y), rotation_z).T)
-transformed_points = np.dot(points_array, rotation_x.T)
+transformed_points = np.dot(points_array, rotation_y)
+transformed_points = np.dot(transformed_points, scaling_z)
 # transformed_points = np.dot(points_array, rotation_y.T)
-transformed_points = np.dot(points_array, rotation_z.T)
+transformed_points = np.dot(transformed_points, rotation_z)
 
 # get only positive points
-# transformed_points = transformed_points[transformed_points[:,2]>0]
-# transformed_points = transformed_points.dot(inverse_center_translation.T)
+transformed_points = transformed_points[transformed_points[:,2]>=-0.1]
+transformed_points = transformed_points.dot(inverse_center_translation.T)
 
 # Drop the last column
-transformed_points = transformed_points[:, :-1]
+# transformed_points_part_2 = transformed_points[:int(transformed_points.shape[0]/2), :-1]
+# transformed_points_part_1 = transformed_points[int(transformed_points.shape[0]/2)+1 :, :-1]
+
+# stacked_array = np.vstack((transformed_points_part_1, transformed_points_part_2))
+unique_data = np.unique(transformed_points, axis=0)
+sorted = unique_data[unique_data[:,1].argsort()]
+
+stacked_array = sorted
 # TODO add 0 and last point
 
 # Create a new feature and set its geometry
@@ -171,11 +179,11 @@ QgsProject.instance().addMapLayer(polygon_layer)
 
 # Create a list of 3D points (replace with your own coordinates)
 polyline_points = []
-for i in range(transformed_points.shape[0]):
-    x = transformed_points[i][0]
+for i in range(stacked_array.shape[0]):
+    x = stacked_array[i][0]
     print(x)
-    y = transformed_points[i][1]
-    z = transformed_points[i][2]
+    y = stacked_array[i][1]
+    z = stacked_array[i][2]
     polyline_points.append(QgsPoint(x, y, z))
 
 # Create a QgsGeometry for the 3D polyline
