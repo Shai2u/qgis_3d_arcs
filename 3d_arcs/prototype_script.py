@@ -44,7 +44,7 @@ def translate(x, y):
         [0, 0, 0, 1]
     ])
 
-def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale, location, date_time):
+def generate_arc(polyline_layer, x1, y1, x2, y2, segments, y_angle, z_scale, location, date_time):
     # Define the EPSG code
     epsg_code = 3857
 
@@ -54,19 +54,8 @@ def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale, location, date_time
 
     # Calculate the center point for the circle
     # Create a vector layer to store the line
-    line_layer = QgsVectorLayer("LineString?crs=EPSG:3857", "Line", "memory")
+    line_layer = QgsVectorLayer(f"LineString?crs=EPSG:{epsg_code}", "Line", "memory")
     provider = line_layer.dataProvider()
-
-    fields = [
-        QgsField('date', QVariant.Date),
-        QgsField('location', QVariant.String),
-        QgsField('east', QVariant.Int),
-        QgsField('north', QVariant.Int),
-        QgsField('east_g', QVariant.Int),
-        QgsField('north_g', QVariant.Int)
-    ]
-
-
 
     line_geometry = QgsGeometry.fromPolyline([point1, point2])
 
@@ -127,11 +116,11 @@ def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale, location, date_time
     # Create a QgsGeometry for the 3D polyline
     polyline = QgsGeometry.fromPolyline(polyline_points)
 
-    # Create a memory vector layer to store the 3D polyline
-    polyline_layer = QgsVectorLayer(f"LineStringZ?crs=EPSG:{epsg_code}", "Polyline 3D", "memory")
+    # # Create a memory vector layer to store the 3D polyline
+    # polyline_layer = QgsVectorLayer(f"LineStringZ?crs=EPSG:{epsg_code}", "Polyline 3D", "memory")
     provider = polyline_layer.dataProvider()
-    provider.addAttributes(fields)
-    polyline_layer.updateFields()
+    # provider.addAttributes(fields)
+    # polyline_layer.updateFields()
     polyline_layer.startEditing()
 
     # Create a feature with the 3D polyline
@@ -146,12 +135,34 @@ def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale, location, date_time
     polyline_layer.updateExtents()
     polyline_layer.commitChanges()
     # Add the layer to the QGIS map canvas (optional)
-    QgsProject.instance().addMapLayer(polyline_layer)
+
 
     # Refresh the map canvas
     iface.mapCanvas().refresh()
+    return polyline_layer
 
 
-generate_arc(3857812, 3737660, 3834231, 3700385, 10, 90, 0.5, 'Ashdod - Yod Alef', '2023-10-21 09:01:00')
+def generate_arc_layer(layer_name):
+    fields = [
+        QgsField('date', QVariant.Date),
+        QgsField('location', QVariant.String),
+        QgsField('east', QVariant.Int),
+        QgsField('north', QVariant.Int),
+        QgsField('east_g', QVariant.Int),
+        QgsField('north_g', QVariant.Int)
+    ]
+    epsg_code = 3857
+    # Create a memory vector layer to store the 3D polyline
+    polyline_layer = QgsVectorLayer(f"LineStringZ?crs=EPSG:{epsg_code}", layer_name, "memory")
+    provider = polyline_layer.dataProvider()
+    provider.addAttributes(fields)
+    polyline_layer.updateFields()
+    return polyline_layer
+layer = generate_arc_layer('Missles to Israel')
+
+layer = generate_arc(layer, 3857812, 3737660, 3834231, 3700385, 10, 90, 0.5, 'Ashdod - Yod Alef', '2023-10-21 09:01:00')
+layer = generate_arc(layer, 3857812,3737660, 3834725, 3698662, 10, 90, 0.5, 'Ashdod - Yod Alef', '2023-10-20 21:03:00')
+
+QgsProject.instance().addMapLayer(layer)
 
 # create the layer first then iterate the rows and generate the features and add them to the layer
