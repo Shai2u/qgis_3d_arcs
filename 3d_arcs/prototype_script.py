@@ -144,7 +144,7 @@ def generate_arc(polyline_layer, x1, y1, x2, y2, segments, y_angle, z_scale, loc
 
 def generate_arc_layer(layer_name):
     fields = [
-        QgsField('date', QVariant.Date),
+        QgsField('date', QVariant.DateTime),
         QgsField('location', QVariant.String),
         QgsField('east', QVariant.Int),
         QgsField('north', QVariant.Int),
@@ -158,10 +158,29 @@ def generate_arc_layer(layer_name):
     provider.addAttributes(fields)
     polyline_layer.updateFields()
     return polyline_layer
+
 layer = generate_arc_layer('Missles to Israel')
 
-layer = generate_arc(layer, 3857812, 3737660, 3834231, 3700385, 10, 90, 0.5, 'Ashdod - Yod Alef', '2023-10-21 09:01:00')
-layer = generate_arc(layer, 3857812,3737660, 3834725, 3698662, 10, 90, 0.5, 'Ashdod - Yod Alef', '2023-10-20 21:03:00')
+# Define the path to your Excel file
+csv_file_path = '/Users/shai/Documents/Projects/qgis_3d_arcs/sample/israel_rockets_with_random_launch_3857_2023_09_09_2023_10_20.csv'
+
+# Load the Excel file as a QgsVectorLayer
+csv_layer = QgsVectorLayer(f'{csv_file_path}', 'CSV Layer', 'ogr')
+
+# Get the field names
+field_names = csv_layer.fields().names()
+
+# Iterate through features and retrieve data
+for feature in csv_layer.getFeatures():
+    x1 = feature['east']
+    y1 = feature['north']
+    x2 = feature['east_g']
+    y2 = feature['north_g']
+    location = feature['locations']
+    date_time = feature['date_time']
+    layer = generate_arc(layer, int(x1), int(y1), int(x2), int(y2), 10, 90, 0.5, location, date_time)
+
+
 
 QgsProject.instance().addMapLayer(layer)
 
