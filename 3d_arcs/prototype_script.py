@@ -126,7 +126,7 @@ def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale):
     provider.addAttributes([QgsField("Name", QVariant.String)])
     polyline_layer.updateFields()
     polyline_layer.startEditing()
-    
+
     # Create a feature with the 3D polyline
     feature = QgsFeature()
     feature.setGeometry(polyline)
@@ -141,14 +141,6 @@ def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale):
     # Add the layer to the QGIS map canvas (optional)
     QgsProject.instance().addMapLayer(polyline_layer)
 
-    # Save the layer to a file (optional)
-    output_file = "path_to_output_file.shp"
-    writer = QgsVectorFileWriter.writeAsVectorFormat(polyline_layer, output_file, "UTF-8", driverName="ESRI Shapefile")
-
-    if writer:
-        print("3D polyline saved to", output_file)
-    else:
-        print("Failed to save the 3D polyline.")
     # Refresh the map canvas
     iface.mapCanvas().refresh()
 
