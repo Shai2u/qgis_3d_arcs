@@ -44,7 +44,7 @@ def translate(x, y):
         [0, 0, 0, 1]
     ])
 
-def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale):
+def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale, location, date_time):
     # Define the EPSG code
     epsg_code = 3857
 
@@ -56,8 +56,18 @@ def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale):
     # Create a vector layer to store the line
     line_layer = QgsVectorLayer("LineString?crs=EPSG:3857", "Line", "memory")
     provider = line_layer.dataProvider()
-    provider.addAttributes([QgsField("Name", QVariant.String)])
-    line_layer.updateFields()
+
+    fields = [
+        QgsField('date', QVariant.Date),
+        QgsField('location', QVariant.String),
+        QgsField('east', QVariant.Int),
+        QgsField('north', QVariant.Int),
+        QgsField('east_g', QVariant.Int),
+        QgsField('north_g', QVariant.Int)
+    ]
+
+
+
     line_geometry = QgsGeometry.fromPolyline([point1, point2])
 
     # Get the center coordinate
@@ -120,14 +130,14 @@ def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale):
     # Create a memory vector layer to store the 3D polyline
     polyline_layer = QgsVectorLayer(f"LineStringZ?crs=EPSG:{epsg_code}", "Polyline 3D", "memory")
     provider = polyline_layer.dataProvider()
-    provider.addAttributes([QgsField("Name", QVariant.String)])
+    provider.addAttributes(fields)
     polyline_layer.updateFields()
     polyline_layer.startEditing()
 
     # Create a feature with the 3D polyline
     feature = QgsFeature()
     feature.setGeometry(polyline)
-    feature.setAttributes(["Line"])
+    feature.setAttributes([date_time, location, x1, y1, x2, y2])
 
     # Add the feature to the layer
     provider.addFeatures([feature])
@@ -142,4 +152,6 @@ def generate_arc(x1, y1, x2, y2, segments, y_angle, z_scale):
     iface.mapCanvas().refresh()
 
 
-generate_arc(3834358, 3699610, 3877714, 3757735, 10, 45, 0.5)
+generate_arc(3857812, 3737660, 3834231, 3700385, 10, 90, 0.5, 'Ashdod - Yod Alef', '2023-10-21 09:01:00')
+
+# create the layer first then iterate the rows and generate the features and add them to the layer
