@@ -19,8 +19,8 @@ def generate_arc(x1, y1, x2, y2):
     point_layer.updateFields()
 
     # Define the two points
-    point1 = QgsPoint(3834358, 3699610)
-    point2 = QgsPoint(3877714, 3757735)
+    point1 = QgsPoint(x1, y1)
+    point2 = QgsPoint(x2, y2)
 
     # Calculate the center point for the circle
     # Create a vector layer to store the line
