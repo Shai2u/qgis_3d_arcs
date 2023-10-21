@@ -74,15 +74,6 @@ angle_y = np.radians(90)  # Rotation around Y-axis
 # get bearing
 angle_z = np.radians(45)  # Rotation around Z-axis
 
-# center_translation = np.array([
-#     [1, 0, 0, -1 * center_point.asPoint().x()],
-#     [0, 1, 0, -1 * center_point.asPoint().y()],
-#     [0, 0, 1, 0],
-#     [0, 0, 0, 1]
-# ])
-
-# Apply the rotation around Y-axis (using the standard 3D rotation matrix)
-
 # Apply the rotation around Y-axis (using the standard 3D rotation matrix)
 rotation_x = np.array([
     [1, 0, 0, 0],
