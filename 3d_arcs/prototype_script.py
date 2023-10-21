@@ -54,7 +54,7 @@ origin = QgsGeometry.fromPointXY(QgsPointXY(0, 0))
 radius = int(line_geometry.length()/2)
 
 # Create the circle polygon
-circle = origin.buffer(radius,5)
+circle = origin.buffer(radius,10)
 
 
 
