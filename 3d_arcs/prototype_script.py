@@ -23,7 +23,7 @@ point2 = QgsPoint(3877714, 3757735)
 
 # Calculate the center point for the circle
 # Create a vector layer to store the line
-line_layer = QgsVectorLayer("LineString?crs=EPSG:4326", "Line", "memory")
+line_layer = QgsVectorLayer("LineString?crs=EPSG:3857", "Line", "memory")
 provider = line_layer.dataProvider()
 provider.addAttributes([QgsField("Name", QVariant.String)])
 line_layer.updateFields()
@@ -181,19 +181,22 @@ for i in range(stacked_array.shape[0]):
 polyline = QgsGeometry.fromPolyline(polyline_points)
 
 # Create a memory vector layer to store the 3D polyline
-polyline_layer = QgsVectorLayer("LineStringZ", "3D Polyline", "memory")
-pr = polyline_layer.dataProvider()
-
+polyline_layer = QgsVectorLayer(f"LineStringZ?crs=EPSG:{epsg_code}", "Polyline 3D", "memory")
+provider = polyline_layer.dataProvider()
+provider.addAttributes([QgsField("Name", QVariant.String)])
+polyline_layer.updateFields()
+polyline_layer.startEditing()
 # Create a feature with the 3D polyline
 feature = QgsFeature()
 feature.setGeometry(polyline)
+feature.setAttributes(["Line"])
 
 # Add the feature to the layer
-pr.addFeatures([feature])
+provider.addFeatures([feature])
 
 # Update the layer's extent
 polyline_layer.updateExtents()
-
+polyline_layer.commitChanges()
 # Add the layer to the QGIS map canvas (optional)
 QgsProject.instance().addMapLayer(polyline_layer)
 
