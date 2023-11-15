@@ -9,7 +9,7 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "https://api.maptiler.com/tiles/v3/tiles.json?key=khvVGD9ThOCYQHMkBNt5"
+      "url": "https://api.maptiler.com/tiles/v3/tiles.json?key=NpiEoxUcjvpWITPPpNeQ"
     },
     "natural_earth_shaded_relief": {
       "maxzoom": 6,
@@ -21,7 +21,7 @@
     }
   },
   "sprite": "https://maputnik.github.io/osm-liberty/sprites/osm-liberty",
-  "glyphs": "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=khvVGD9ThOCYQHMkBNt5",
+  "glyphs": "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=NpiEoxUcjvpWITPPpNeQ",
   "layers": [
     {
       "id": "background",
