@@ -1927,7 +1927,8 @@
         "text-font": ["Roboto Condensed Italic"],
         "text-max-width": 9,
         "text-offset": [0, 0.6],
-        "text-size": 12
+        "text-size": 12,
+        "visibility": "none"
       },
       "paint": {
         "text-color": "#666",
@@ -1949,7 +1950,8 @@
         "text-font": ["Roboto Condensed Italic"],
         "text-max-width": 9,
         "text-offset": [0.9, 0],
-        "text-size": 12
+        "text-size": 12,
+        "visibility": "none"
       },
       "paint": {
         "text-color": "#4898ff",
