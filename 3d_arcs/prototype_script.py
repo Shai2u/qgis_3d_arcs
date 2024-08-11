@@ -71,6 +71,7 @@ def generate_arc(polyline_layer, x1, y1, x2, y2, segments, y_angle, z_scale, loc
     # Create the circle polygon
     circle = origin.buffer(radius, segments)
 
+    points_array = np.array([])
     # Populate array with X,Y,Z coordinates
     for i in range(len(circle.asPolygon()[0])):
         point_ = circle.asPolygon()[0][i]
@@ -162,26 +163,56 @@ def generate_arc_layer(layer_name):
 layer = generate_arc_layer('Missles to Israel')
 
 # Define the path to your Excel file
-csv_file_path = '/Users/shai/Documents/Projects/qgis_3d_arcs/sample/israel_rockets_with_random_launch_3857_2023_09_09_2023_10_20.csv'
-
+# csv_file_path = '/Users/shai/Documents/Projects/qgis_3d_arcs/sample/israel_rockets_with_random_launch_3857_2023_09_09_2023_10_20.csv'
+layer_input = '/Users/shai/Documents/Projects/qgis_3d_arcs/sample/example_lines.geojson'
 # Load the Excel file as a QgsVectorLayer
-csv_layer = QgsVectorLayer(f'{csv_file_path}', 'CSV Layer', 'ogr')
+# csv_layer = QgsVectorLayer(f'{csv_file_path}', 'CSV Layer', 'ogr')
+vecotr_layer = QgsVectorLayer(f'{layer_input}', 'input Layer', 'ogr')
 
 # Get the field names
-field_names = csv_layer.fields().names()
+# field_names = csv_layer.fields().names()
+
+count = 0
+for feature in vecotr_layer.getFeatures():
+    
+    first_point = feature.geometry().asPolyline()[0]
+    last_point = feature.geometry().asPolyline()[-1]
+    x1 = first_point.x()
+    y1 = first_point.y()
+
+    x2 = last_point.x()
+    y2 = last_point.y()
+    location = feature['locations']
+    date_time = str(feature['date_time'])
+    layer = generate_arc(layer, int(x1), int(y1), int(x2), int(y2), 10, 90, 0.5, location, date_time)
+    QgsProject.instance().addMapLayer(layer)
+    count += 1
+    if count >3:
+        break
+
+
+# for feature in vecotr_layer.getFeatures():
+#     x1 = feature['east']
+#     y1 = feature['north']
+#     x2 = feature['east_g']
+#     y2 = feature['north_g']
+#     location = feature['locations']
+#     date_time = feature['date_time']
+#     layer = generate_arc(layer, int(x1), int(y1), int(x2), int(y2), 10, 90, 0.5, location, date_time)
+
 
 # Iterate through features and retrieve data
-for feature in csv_layer.getFeatures():
-    x1 = feature['east']
-    y1 = feature['north']
-    x2 = feature['east_g']
-    y2 = feature['north_g']
-    location = feature['locations']
-    date_time = feature['date_time']
-    layer = generate_arc(layer, int(x1), int(y1), int(x2), int(y2), 10, 90, 0.5, location, date_time)
+# for feature in csv_layer.getFeatures():
+#     x1 = feature['east']
+#     y1 = feature['north']
+#     x2 = feature['east_g']
+#     y2 = feature['north_g']
+#     location = feature['locations']
+#     date_time = feature['date_time']
+#     layer = generate_arc(layer, int(x1), int(y1), int(x2), int(y2), 10, 90, 0.5, location, date_time)
 
 
 
-QgsProject.instance().addMapLayer(layer)
+#     QgsProject.instance().addMapLayer(layer)
 
 # create the layer first then iterate the rows and generate the features and add them to the layer
