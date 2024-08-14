@@ -44,7 +44,7 @@ def translate(x, y):
         [0, 0, 0, 1]
     ])
 
-def generate_arc(polyline_layer, x1, y1, x2, y2, segments, y_angle, z_scale, location, date_time):
+def generate_arc(layer, x1, y1, x2, y2, segments, y_angle, z_scale, location):
     # Define the EPSG code
     epsg_code = 3857
 
@@ -54,8 +54,8 @@ def generate_arc(polyline_layer, x1, y1, x2, y2, segments, y_angle, z_scale, loc
 
     # Calculate the center point for the circle
     # Create a vector layer to store the line
-    line_layer = QgsVectorLayer(f"LineString?crs=EPSG:{epsg_code}", "Line", "memory")
-    provider = line_layer.dataProvider()
+    #line_layer = QgsVectorLayer(f"LineString?crs=EPSG:{epsg_code}", "Line", "memory")
+    provider = layer.dataProvider()
 
     line_geometry = QgsGeometry.fromPolyline([point1, point2])
 
@@ -118,34 +118,35 @@ def generate_arc(polyline_layer, x1, y1, x2, y2, segments, y_angle, z_scale, loc
     polyline = QgsGeometry.fromPolyline(polyline_points)
 
     # # Create a memory vector layer to store the 3D polyline
-    # polyline_layer = QgsVectorLayer(f"LineStringZ?crs=EPSG:{epsg_code}", "Polyline 3D", "memory")
-    provider = polyline_layer.dataProvider()
+    # layer = QgsVectorLayer(f"LineStringZ?crs=EPSG:{epsg_code}", "Polyline 3D", "memory")
+    provider = layer.dataProvider()
     # provider.addAttributes(fields)
-    # polyline_layer.updateFields()
-    polyline_layer.startEditing()
+    # layer.updateFields()
+    layer.startEditing()
 
     # Create a feature with the 3D polyline
     feature = QgsFeature()
     feature.setGeometry(polyline)
-    feature.setAttributes([date_time, location, x1, y1, x2, y2])
+    feature.setAttributes([ location, x1, y1, x2, y2])
 
     # Add the feature to the layer
     provider.addFeatures([feature])
 
     # Update the layer's extent
-    polyline_layer.updateExtents()
-    polyline_layer.commitChanges()
+    layer.updateExtents()
+    layer.commitChanges()
     # Add the layer to the QGIS map canvas (optional)
 
 
     # Refresh the map canvas
-    iface.mapCanvas().refresh()
-    return polyline_layer
+    #iface.mapCanvas().refresh()
+    print('completed appending')
+    return layer
 
 
 def generate_arc_layer(layer_name):
     fields = [
-        QgsField('date', QVariant.DateTime),
+        # QgsField('date', QVariant.DateTime),
         QgsField('location', QVariant.String),
         QgsField('east', QVariant.Int),
         QgsField('north', QVariant.Int),
@@ -164,17 +165,19 @@ layer = generate_arc_layer('Missles to Israel')
 
 # Define the path to your Excel file
 # csv_file_path = '/Users/shai/Documents/Projects/qgis_3d_arcs/sample/israel_rockets_with_random_launch_3857_2023_09_09_2023_10_20.csv'
-layer_input = '/Users/shai/Documents/Projects/qgis_3d_arcs/sample/example_lines.geojson'
+layer_input = '/Users/shai/Documents/Projects/qgis_3d_arcs/sample/example_lines_with_length.geojson'
+
 # Load the Excel file as a QgsVectorLayer
 # csv_layer = QgsVectorLayer(f'{csv_file_path}', 'CSV Layer', 'ogr')
-vecotr_layer = QgsVectorLayer(f'{layer_input}', 'input Layer', 'ogr')
+polyline_layer = QgsVectorLayer(f'{layer_input}', 'input Layer', 'ogr')
 
 # Get the field names
 # field_names = csv_layer.fields().names()
 
 count = 0
-for feature in vecotr_layer.getFeatures():
-    
+for feature in polyline_layer.getFeatures():
+    #features = [feature for feature in polyline_layer.getFeatures()]
+    #feature = features[0]
     first_point = feature.geometry().asPolyline()[0]
     last_point = feature.geometry().asPolyline()[-1]
     x1 = first_point.x()
@@ -183,13 +186,14 @@ for feature in vecotr_layer.getFeatures():
     x2 = last_point.x()
     y2 = last_point.y()
     location = feature['locations']
-    date_time = str(feature['date_time'])
-    layer = generate_arc(layer, int(x1), int(y1), int(x2), int(y2), 10, 90, 0.5, location, date_time)
-    QgsProject.instance().addMapLayer(layer)
-    count += 1
-    if count >3:
-        break
+    # date_time = str(feature['date_time'])
+    segments, y_angle, z_scale = 10, 90, 0.5
+    layer = generate_arc(layer, int(x1), int(y1), int(x2), int(y2), segments, y_angle, z_scale, location)
+    #count += 1
+    #if count >3:
+    #    break
 
+QgsProject.instance().addMapLayer(layer)
 
 # for feature in vecotr_layer.getFeatures():
 #     x1 = feature['east']
