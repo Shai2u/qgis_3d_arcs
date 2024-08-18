@@ -35,7 +35,7 @@ from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingParameterFeatureSink, QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsProject, QgsProcessingParameterNumber)
 from .arc_3d_methods import generate_3d_polyline_from_geometry
 
 class Arc3DAlgorithm(QgsProcessingAlgorithm):
@@ -57,6 +57,9 @@ class Arc3DAlgorithm(QgsProcessingAlgorithm):
     # calling from the QGIS console.
 
     OUTPUT = 'OUTPUT'
+    SEGMENT_SLIDER = 'SEGMENT_SLIDER'
+    Y_ANGLE = 'Y_ANGLE'
+    Z_SCALE = 'Z_SCALE'
     INPUT = 'INPUT'
 
     def initAlgorithm(self, config):
@@ -74,6 +77,38 @@ class Arc3DAlgorithm(QgsProcessingAlgorithm):
                 [QgsProcessing.TypeVectorAnyGeometry]
             )
         )
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.SEGMENT_SLIDER,
+                "Select number of segments for thre arce in range (3 to 15)",
+                type=QgsProcessingParameterNumber.Integer,
+                minValue=3,
+                maxValue=15,
+                defaultValue=5  # Default value set to 5
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.Y_ANGLE,
+                "Select the Y-angle for the arcs in range (10 to 90)",
+                type=QgsProcessingParameterNumber.Integer,
+                minValue=10,
+                maxValue=90,
+                defaultValue=90  # Default value set to 5
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.Z_SCALE,
+                "Select the Z-scale for the arcs (0 to 1)",
+                type=QgsProcessingParameterNumber.Double,
+                minValue=0,
+                maxValue=1,
+                defaultValue=0.5  # Default value set to 5
+            )
+        )
 
         # We add a feature sink in which to store our processed features (this
         # usually takes the form of a newly created vector layer when the
@@ -84,6 +119,7 @@ class Arc3DAlgorithm(QgsProcessingAlgorithm):
                 self.tr('Output layer')
             )
         )
+        self.crs_3d = 3857
 
     def processAlgorithm(self, parameters, context, feedback):
         """
@@ -94,6 +130,11 @@ class Arc3DAlgorithm(QgsProcessingAlgorithm):
         # to uniquely identify the feature sink, and must be included in the
         # dictionary returned by the processAlgorithm function.
         source = self.parameterAsSource(parameters, self.INPUT, context)
+        
+        segments = self.parameterAsDouble(parameters, self.SEGMENT_SLIDER, context)
+        y_angle = self.parameterAsDouble(parameters, self.Y_ANGLE, context)
+        z_scale = self.parameterAsDouble(parameters, self.Z_SCALE, context)
+
         (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
                 context, source.fields(), source.wkbType(), source.sourceCrs())
 
@@ -101,13 +142,27 @@ class Arc3DAlgorithm(QgsProcessingAlgorithm):
         # get features from source
         total = 100.0 / source.featureCount() if source.featureCount() else 0
         features = source.getFeatures()
-
+        transform_to_3857 = QgsCoordinateTransform(
+                QgsCoordinateReferenceSystem(source.sourceCrs().authid()),
+                QgsCoordinateReferenceSystem(self.crs_3d),
+                QgsProject.instance(),
+            )
+        transform_from_3857 = QgsCoordinateTransform(
+                QgsCoordinateReferenceSystem(self.crs_3d),
+                QgsCoordinateReferenceSystem(source.sourceCrs().authid()),
+                QgsProject.instance(),
+            )
         for current, feature in enumerate(features):
             # Stop the algorithm if cancel button has been clicked
             if feedback.isCanceled():
                 break
-            segments, y_angle, z_scale = 10, 90, 0.5
-            feature_3d_polyline = generate_3d_polyline_from_geometry(feature.geometry(), segments, y_angle, z_scale)
+            if '3857' not in source.sourceCrs().authid():
+                geometry_ = feature.geometry()
+                geometry_.transform(transform_to_3857)
+                feature_3d_polyline = generate_3d_polyline_from_geometry(geometry_, segments, y_angle, z_scale)
+                feature_3d_polyline.transform(transform_from_3857)
+            else:
+                feature_3d_polyline = generate_3d_polyline_from_geometry(feature.geometry(), segments, y_angle, z_scale)
             feature.setGeometry(feature_3d_polyline)
             # Add a feature in the sink
             sink.addFeature(feature, QgsFeatureSink.FastInsert)
