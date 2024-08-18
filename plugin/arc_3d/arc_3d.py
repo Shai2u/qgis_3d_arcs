@@ -53,8 +53,10 @@ class Arc3DPlugin(object):
         self.provider = Arc3DProvider()
         QgsApplication.processingRegistry().addProvider(self.provider)
 
+
     def initGui(self):
         self.initProcessing()
 
     def unload(self):
         QgsApplication.processingRegistry().removeProvider(self.provider)
+

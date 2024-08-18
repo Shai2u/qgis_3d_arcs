@@ -32,7 +32,7 @@ __revision__ = '$Format:%H$'
 
 from qgis.core import QgsProcessingProvider
 from .arc_3d_algorithm import Arc3DAlgorithm
-
+from .arc_3d_algorithm_layer_parameters import Arc3DAlgorithmLayerParameter
 
 class Arc3DProvider(QgsProcessingProvider):
 
@@ -54,6 +54,7 @@ class Arc3DProvider(QgsProcessingProvider):
         Loads all algorithms belonging to this provider.
         """
         self.addAlgorithm(Arc3DAlgorithm())
+        self.addAlgorithm(Arc3DAlgorithmLayerParameter())
         # add additional algorithms here
         # self.addAlgorithm(MyOtherAlgorithm())
 
@@ -89,3 +90,6 @@ class Arc3DProvider(QgsProcessingProvider):
         implementation returns the same string as name().
         """
         return self.name()
+
+
+
