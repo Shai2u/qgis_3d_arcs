@@ -36,7 +36,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink)
-
+from .arc_3d_methods import generate_3d_polyline_from_geometry
 
 class Arc3DAlgorithm(QgsProcessingAlgorithm):
     """
@@ -106,13 +106,15 @@ class Arc3DAlgorithm(QgsProcessingAlgorithm):
             # Stop the algorithm if cancel button has been clicked
             if feedback.isCanceled():
                 break
-
+            segments, y_angle, z_scale = 10, 90, 0.5
+            feature_3d_polyline = generate_3d_polyline_from_geometry(feature.geometry(), segments, y_angle, z_scale)
+            feature.setGeometry(feature_3d_polyline)
             # Add a feature in the sink
             sink.addFeature(feature, QgsFeatureSink.FastInsert)
 
             # Update the progress bar
             feedback.setProgress(int(current * total))
-
+        print(source.sourceCrs())
         # Return the results of the algorithm. In this case our only result is
         # the feature sink which contains the processed features, but some
         # algorithms may return multiple feature sinks, calculated numeric

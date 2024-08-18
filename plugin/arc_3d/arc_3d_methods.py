@@ -115,7 +115,6 @@ def create_3d_empty_layer_from_layer(layer):
     layer_3d.updateFields()
     return layer_3d
 
-
 def generate_3d_polyline_from_geometry(geometry_: QgsGeometry, segments: int, y_angle: float, z_scale: float) -> QgsGeometry:
     """
     Generate a 3D polyline representing an arc based on the input line geometry.
@@ -171,7 +170,7 @@ def generate_3d_polyline_from_geometry(geometry_: QgsGeometry, segments: int, y_
     
     return polyline3D
 
-def append_geometry_data_to_3d_arc(layer_3d: QgsVectorLayer, QgsPoint_list: list[QgsPoint], feature: QgsFeature) -> QgsVectorLayer:
+def append_geometry_data_to_3d_arc(layer_3d: QgsVectorLayer, polyline3D: QgsGeometry, feature: QgsFeature) -> QgsVectorLayer:
     """
     Append geometry data to a 3D arc layer.
 
@@ -186,14 +185,11 @@ def append_geometry_data_to_3d_arc(layer_3d: QgsVectorLayer, QgsPoint_list: list
     """
     provider = layer_3d.dataProvider()
 
-    # Create a QgsGeometry for the 3D polyline
-    polyline = QgsGeometry.fromPolyline(QgsPoint_list)
-
     layer_3d.startEditing()
 
     # Create a feature with the 3D polyline
     new_feature = QgsFeature()
-    new_feature.setGeometry(polyline)
+    new_feature.setGeometry(polyline3D)
     
     # Set attribute values for the new feature
     attributes_ = [feature[field_name] for field_name in layer_3d.fields().names()]
@@ -277,7 +273,7 @@ def main(layer: QgsVectorLayer, segments: int, y_angle: float, z_scale: float) -
         # Generate a list of 3D points representing the arc for the current feature
         polyline_3d = generate_3d_polyline_from_geometry(feature.geometry(), segments, y_angle, z_scale)
         
-        # Append th e geometry data to the 3D arc layer
+        # Append the geometry data to the 3D arc layer
         layer_3d = append_geometry_data_to_3d_arc(layer_3d, polyline_3d, feature)
     
     # Return the updated 3D arc layer
