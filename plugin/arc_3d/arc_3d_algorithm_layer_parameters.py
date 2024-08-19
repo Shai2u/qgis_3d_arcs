@@ -123,9 +123,9 @@ class Arc3DAlgorithmLayerParameter(QgsProcessingAlgorithm):
         # dictionary returned by the processAlgorithm function.
         source = self.parameterAsSource(parameters, self.INPUT, context)
         
-        segments_field = self.parameterAsString(parameters, self.SEGMENT_SLIDER, context)
-        y_angle_field = self.parameterAsString(parameters, self.Y_ANGLE, context)
-        z_scale_field = self.parameterAsString(parameters, self.Z_SCALE, context)
+        segments_field = self.parameterAsString(parameters, self.SEGMENT_SLIDER_field, context)
+        y_angle_field = self.parameterAsString(parameters, self.Y_ANGLE_field, context)
+        z_scale_field = self.parameterAsString(parameters, self.Z_SCALE_field, context)
 
         (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
                 context, source.fields(), source.wkbType(), source.sourceCrs())
@@ -213,3 +213,17 @@ class Arc3DAlgorithmLayerParameter(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return Arc3DAlgorithmLayerParameter()
+    
+
+    def shortHelpString(self):
+        """
+        Returns a localised short helper string for the algorithm. This string
+        should provide a basic description about what the algorithm does and the
+        parameters and outputs associated with it..
+        """
+        return self.tr("""The script converts 2D lines to 3D arcs \n
+                       Select the 2d line from the Input lyaer \n
+                       to control the smoothness of the curve select the number of segments filed \n
+                       to control the angle of the curve select the Y-angle field \n
+                       to control the scewness of the curve select the Z-scale field\n
+                       """)

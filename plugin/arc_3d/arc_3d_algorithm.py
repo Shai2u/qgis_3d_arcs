@@ -217,3 +217,17 @@ class Arc3DAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return Arc3DAlgorithm()
+    
+
+    def shortHelpString(self):
+        """
+        Returns a localised short helper string for the algorithm. This string
+        should provide a basic description about what the algorithm does and the
+        parameters and outputs associated with it..
+        """
+        return self.tr("""The script converts 2D lines to 3D arcs \n
+                       Select the 2d line from the Input lyaer \n
+                       to control the smoothness of the curve select the number of segments \n
+                       to control the angle of the curve select the Y-angle from 10-90 \n
+                       to control the scewness of the curve select the Z-scale value from 0-1\n
+                       """)
