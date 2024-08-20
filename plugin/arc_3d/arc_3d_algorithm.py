@@ -35,7 +35,9 @@ from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink, QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsProject, QgsProcessingParameterNumber)
+                       QgsProcessingParameterFeatureSink, QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsProject, QgsProcessingParameterNumber, QgsVectorLayer)
+from qgis.PyQt.QtGui import QIcon
+
 from .arc_3d_methods import generate_3d_polyline_from_geometry
 
 class Arc3DAlgorithm(QgsProcessingAlgorithm):
@@ -152,6 +154,7 @@ class Arc3DAlgorithm(QgsProcessingAlgorithm):
                 QgsCoordinateReferenceSystem(source.sourceCrs().authid()),
                 QgsProject.instance(),
             )
+        
         for current, feature in enumerate(features):
             # Stop the algorithm if cancel button has been clicked
             if feedback.isCanceled():
@@ -218,6 +221,10 @@ class Arc3DAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return Arc3DAlgorithm()
     
+    def icon(self):
+        """Return the icon."""
+        return QIcon('icon.png')
+
 
     def shortHelpString(self):
         """

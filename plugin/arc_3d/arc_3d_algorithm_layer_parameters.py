@@ -35,7 +35,9 @@ from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink, QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsProject, QgsProcessingParameterField)
+                       QgsProcessingParameterFeatureSink, QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsProject, QgsProcessingParameterField, QgsVectorLayer)
+from qgis.PyQt.QtGui import QIcon
+
 from .arc_3d_methods import generate_3d_polyline_from_geometry
 
 class Arc3DAlgorithmLayerParameter(QgsProcessingAlgorithm):
@@ -214,6 +216,10 @@ class Arc3DAlgorithmLayerParameter(QgsProcessingAlgorithm):
     def createInstance(self):
         return Arc3DAlgorithmLayerParameter()
     
+    def icon(self):
+        """Return the icon."""
+        return QIcon('icon.png')
+
 
     def shortHelpString(self):
         """

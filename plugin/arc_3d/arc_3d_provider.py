@@ -33,6 +33,7 @@ __revision__ = '$Format:%H$'
 from qgis.core import QgsProcessingProvider
 from .arc_3d_algorithm import Arc3DAlgorithm
 from .arc_3d_algorithm_layer_parameters import Arc3DAlgorithmLayerParameter
+from qgis.PyQt.QtGui import QIcon
 
 class Arc3DProvider(QgsProcessingProvider):
 
@@ -75,12 +76,11 @@ class Arc3DProvider(QgsProcessingProvider):
         """
         return self.tr('3D Arcs Creation')
 
+    
     def icon(self):
-        """
-        Should return a QIcon which is used for your provider inside
-        the Processing toolbox.
-        """
-        return QgsProcessingProvider.icon(self)
+        """Return the icon."""
+        return QIcon('icon.png')
+
 
     def longName(self):
         """
@@ -90,6 +90,4 @@ class Arc3DProvider(QgsProcessingProvider):
         implementation returns the same string as name().
         """
         return self.name()
-
-
-
+    
