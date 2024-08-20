@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/plugins/arcs_3d" >
-        <file>icon.png</file>
-    </qresource>
-</RCC>
