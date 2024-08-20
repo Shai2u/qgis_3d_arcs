@@ -126,9 +126,9 @@ class Arc3DAlgorithmLayerParameter(QgsProcessingAlgorithm):
         segments_field = self.parameterAsString(parameters, self.SEGMENT_SLIDER_field, context)
         y_angle_field = self.parameterAsString(parameters, self.Y_ANGLE_field, context)
         z_scale_field = self.parameterAsString(parameters, self.Z_SCALE_field, context)
-
+        layer_3d = QgsVectorLayer(f"LineStringZ?crs=EPSG:{self.crs_3d}", 'temp', "memory")
         (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
-                context, source.fields(), source.wkbType(), source.sourceCrs())
+                context, source.fields(), layer_3d.wkbType(), source.sourceCrs())
 
         # Compute the number of steps to display within the progress bar and
         # get features from source
