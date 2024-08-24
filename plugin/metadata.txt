@@ -6,7 +6,7 @@
 name=3D Arcs
 qgisMinimumVersion=3.0
 description=Tool to convert 2D lines to 3D Arcs
-version=0.1
+version=0.2
 author=Shai Sussman
 email=shai.sussman@gmail.com
 
@@ -21,6 +21,10 @@ repository=https://github.com/Shai2u/qgis_3d_arcs/
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
 # changelog=
+    Version 0.1
+    * first version
+    Version 0.2
+    * Supports non - straight lines such as metro or bus routes, the tool enables to create start-end point from those lines
 
 # Tags are comma separated with spaces allowed
 tags=python, 3D
