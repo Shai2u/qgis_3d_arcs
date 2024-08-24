@@ -137,7 +137,7 @@ def generate_3d_polyline_from_geometry(geometry_: QgsGeometry, segments: int, y_
     center_point = QgsGeometry.fromPointXY(geometry_.centroid().asPoint())
 
     # Create a circle polygon with the specified radius
-    radius = int(geometry_.length() / 2)
+    radius = int(start_point.distance(end_point) / 2)
     circle = QgsGeometry.fromPointXY(QgsPointXY(0, 0)).buffer(radius, segments)
 
     # Create an empty array to store the X, Y, Z coordinates
@@ -156,6 +156,14 @@ def generate_3d_polyline_from_geometry(geometry_: QgsGeometry, segments: int, y_
     transformed_points = np.dot(transformed_points, rotation_z(np.radians(bearing)))
     transformed_points = np.dot(transformed_points, scale_z(z_scale))
     transformed_points = transformed_points.dot(translate(center_point.asPoint().x(), center_point.asPoint().y()).T)
+    transformed_points = transformed_points.dot(translate(center_point.asPoint().x(), center_point.asPoint().y()).T)
+    # Slightly align the points so they would be placed on original lines
+    dx = transformed_points[0][0].astype(float) - end_point.x()
+    dy = transformed_points[0][1].astype(float) - end_point.y()
+    if np.linalg.norm([dx, dy]) > 0.5:
+        transformed_points = transformed_points.dot(translate(-dx, -dy).T)
+
+
 
     # Create a list of QgsPoint objects from the transformed points
     QgsPoint_list = []
