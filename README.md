@@ -21,5 +21,8 @@ El Al (airlines) past and present destinations (3D)
 ![Image](media/europe_3d.png)
 Arcs from Israel to Europe
 
+![Image](media/arcs_3d_nyc.png)
+Convert NYC subway routes to 3D arcs
+
 ![Image](media/plugin_usage.png)
 Plugin Usage
